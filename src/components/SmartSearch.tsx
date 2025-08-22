@@ -49,7 +49,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   
   const searchInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Debounced search function
   const debouncedSearch = useCallback((searchQuery: string) => {
