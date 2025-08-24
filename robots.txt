@@ -1,0 +1,22 @@
+
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+
+# Allow specific paths
+Allow: /movie/
+Allow: /category/
+Allow: /genre/
+Allow: /year/
+Allow: /browse
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: http://localhost:3000/sitemap.xml
+
+

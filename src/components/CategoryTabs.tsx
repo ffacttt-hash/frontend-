@@ -1,32 +1,71 @@
+
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { apiClient } from '@/lib/api'
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  count: number;
+}
 
 export default function CategoryTabs() {
-  const [activeTab, setActiveTab] = useState('BOLLYWOOD MOVIES')
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
-  const tabs = [
-    { name: 'BOLLYWOOD MOVIES', count: 13, color: 'bg-green-600' },
-    { name: 'DUAL AUDIO CONTENT', count: 14, color: 'bg-red-600' },
-    { name: 'HOLLYWOOD MOVIES', count: 15, color: 'bg-orange-500' },
-    { name: 'JOIN OUR TELEGRAM', count: 16, color: 'bg-blue-500' },
-  ]
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true)
+        const response = await apiClient.getCategories()
+        if (response.success) {
+          setCategories(response.data.map((cat: string) => ({ _id: cat, name: cat, slug: cat.toLowerCase().replace(/\s+/g, '-'), count: 0 }))) // Assuming count is not returned from API yet
+        } else {
+          setError(response.message || 'Failed to fetch categories')
+        }
+      } catch (err) {
+        setError('Failed to fetch categories')
+        console.error('Error fetching categories:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
+  const handleCategoryClick = (slug: string) => {
+    router.push(`/category/${slug}`)
+  }
+
+  if (loading) {
+    return <div className="mb-6">Loading categories...</div>
+  }
+
+  if (error) {
+    return <div className="mb-6 text-red-400">Error: {error}</div>
+  }
 
   return (
     <div className="mb-6">
       <div className="flex flex-wrap gap-2">
-        {tabs.map((tab) => (
+        {categories.map((category) => (
           <button
-            key={tab.name}
-            onClick={() => setActiveTab(tab.name)}
-            className={`px-6 py-3 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90 ${
-              activeTab === tab.name ? tab.color : 'bg-gray-700'
-            }`}
+            key={category._id}
+            onClick={() => handleCategoryClick(category.slug)}
+            className={`px-6 py-3 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90 bg-gray-700`}
           >
-            {tab.name}
-            <span className="ml-2 bg-black bg-opacity-30 px-2 py-1 rounded text-xs">
-              {tab.count}
-            </span>
+            {category.name}
+            {category.count > 0 && (
+              <span className="ml-2 bg-black bg-opacity-30 px-2 py-1 rounded text-xs">
+                {category.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
